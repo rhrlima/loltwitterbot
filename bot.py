@@ -1,3 +1,4 @@
+import datetime
 import json
 import random
 import threading
@@ -32,9 +33,9 @@ def get_random_pick(cls=None):
 def post_tweet(message):
 	if len(message) < 140:
 		status = api.PostUpdate(message)
-		print("<<tweeting>>", status.text)
+		update_status(status.text)
 	else:
-		print("<<error>> message is too long.")
+		update_status("message is too long", "ERROR")
 
 
 def reply_tweet(message):
@@ -58,6 +59,19 @@ def recommend_pick():
 #---
 
 
+def update_status(text, status=None):
+	time = datetime.datetime.now()
+	status_text = str(time)
+	if status is None:
+		status_text += "\t<<tweeting>>"
+	elif status == "ERROR":
+		status_text += "\t<<error>>"
+	else:
+		status_text += "\t<<unkown>>"
+	status_text += "\t" + text
+	print(status_text)
+
+
 #executes the given function after each X seconds
 def set_interval(func, sec):
     def func_wrapper():
@@ -68,6 +82,5 @@ def set_interval(func, sec):
     return t
 
 
-starting_tweet()
-recommend_pick()
-#set_interval(recommend_pick, 5)
+#starting_tweet() #Initial bot tweet
+#set_interval(recommend_pick, 60*60) #Tweets a pick each 1h
