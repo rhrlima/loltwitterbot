@@ -12,6 +12,7 @@ config = json.loads(open("config.json").read()) #
 #set up the connection with the twitter api
 auth = tweepy.OAuthHandler(config['consumer_key'], config['consumer_secret'])
 auth.set_access_token(config['access_token_key'], config['access_token_secret'])
+
 #authorizing the connection
 api = tweepy.API(auth)
 
@@ -22,8 +23,14 @@ classes = json.loads(open("classes.json").read()) # load champions
 
 class BotStreamListener(tweepy.StreamListener):
 
+
 	def on_status(self, status):
-		print(status.text)
+		set_status("reply event triggered", "LOG")
+		parse_request(
+			status.in_reply_to_screen_name,
+			status.user.screen_name,
+			status.text)
+
 
 	def on_error(self, status_code):
 		if status_code == 420:
@@ -51,8 +58,27 @@ def post_tweet(message):
 		set_status(data['message'], "ERROR")
 
 
-def reply_tweet(message):
-	pass
+def reply_tweet(to, message):
+	message = "@" + to + " " + message
+	post_tweet(message)
+
+
+def parse_request(to, replyto, text):
+	if to == "what_pick":
+		if "#assassin" in text.lower():
+			recommend_pick(replyto, "ASSASSIN")
+		elif "#fighter" in text.lower():
+			recommend_pick(replyto, "FIGHTER")
+		elif "#mage" in text.lower():
+			recommend_pick(replyto, "MAGE")
+		elif "#marksman" in text.lower():
+			recommend_pick(replyto, "MARKSMAN")
+		elif "#support" in text.lower():
+			recommend_pick(replyto, "SUPPORT")
+		elif "#tank" in text.lower():
+			recommend_pick(replyto, "TANK")
+		else:
+			reply_tweet(replyto, "Try use #assassin #fighter #mage #marksman #support #tank ")
 
 
 #---
@@ -63,9 +89,12 @@ def starting_tweet():
 	post_tweet(text)
 
 
-def recommend_pick():
-	champion = get_random_pick()
-	text = "You should try " + champion['name'] + " " + champion['title'] + "! #whatShouldIPick"
+def recommend_pick(to=None, cls=None):
+	champion = get_random_pick(cls)
+	text = ""
+	if to is not None:
+		text += "@" + to + " "
+	text += "You should try " + champion['name'] + " " + champion['title'] + "! #whatShouldIPick"
 	post_tweet(text)
 
 
@@ -77,8 +106,12 @@ def set_status(text, status=None):
 	status_text = str(time)
 	if status is None:
 		status_text += "\t<<tweeting>>"
-	elif status == "ERROR":
+	elif status is "TRIGGER":
+		status_text += "\t<<triggered>>"
+	elif status is "ERROR":
 		status_text += "\t<<error>>"
+	elif status is "LOG":
+		status_text += "\t<< log >>"
 	else:
 		status_text += "\t<<unkown>>"
 	status_text += "\t" + text
@@ -95,13 +128,12 @@ def set_interval(func, sec):
     return t
 
 
+set_status("starting lol twitter bot", "LOG")
+
 #starting_tweet() #Initial bot tweet
-#set_interval(recommend_pick, 60*60) #Tweets a pick each 1h
 
-print("Listener bot")
+#Tweets a random pick each 1h
+set_interval(recommend_pick, 60*60)
+
+#Stream that reaplies to given keywords
 stream.filter(track=['@what_pick'], async=True)
-
-def hello():
-	print("Hello")
-
-set_interval(hello, 5)
