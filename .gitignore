@@ -1,2 +1,4 @@
+champions.py
 *.json
+.gitignore
 
