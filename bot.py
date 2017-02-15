@@ -1,25 +1,37 @@
 import datetime
 import json
 import random
+import sys
 import threading
-import twitter
-
+import tweepy
 
 #loads the base configurations for access keys
 config = json.loads(open("config.json").read()) #
 
 
 #set up the connection with the twitter api
-api = twitter.Api(
-	consumer_key		=	config['consumer_key'],
-	consumer_secret		=	config['consumer_secret'],
-	access_token_key	=	config['access_token_key'],
-	access_token_secret	=	config['access_token_secret']
-)
+auth = tweepy.OAuthHandler(config['consumer_key'], config['consumer_secret'])
+auth.set_access_token(config['access_token_key'], config['access_token_secret'])
+#authorizing the connection
+api = tweepy.API(auth)
 
 
 #loads the champions data from json file
 classes = json.loads(open("classes.json").read()) # load champions
+
+
+class BotStreamListener(tweepy.StreamListener):
+
+	def on_status(self, status):
+		print(status.text)
+
+	def on_error(self, status_code):
+		if status_code == 420:
+			return False
+
+
+listener = BotStreamListener()
+stream = tweepy.Stream(auth = api.auth, listener = listener)
 
 
 #get a random champion from a random class if not specified
@@ -31,11 +43,12 @@ def get_random_pick(cls=None):
 
 #post a tweet with the given message
 def post_tweet(message):
-	if len(message) < 140:
-		status = api.PostUpdate(message)
-		update_status(status.text)
-	else:
-		update_status("message is too long", "ERROR")
+	try:
+		status = api.update_status(message)
+		set_status(status.text)
+	except tweepy.TweepError as e:
+		data = json.loads(e.reason.replace("[", "").replace("]", "").replace("'", "\""))
+		set_status(data['message'], "ERROR")
 
 
 def reply_tweet(message):
@@ -59,7 +72,7 @@ def recommend_pick():
 #---
 
 
-def update_status(text, status=None):
+def set_status(text, status=None):
 	time = datetime.datetime.now()
 	status_text = str(time)
 	if status is None:
@@ -84,3 +97,11 @@ def set_interval(func, sec):
 
 #starting_tweet() #Initial bot tweet
 #set_interval(recommend_pick, 60*60) #Tweets a pick each 1h
+
+print("Listener bot")
+stream.filter(track=['@what_pick'], async=True)
+
+def hello():
+	print("Hello")
+
+set_interval(hello, 5)
