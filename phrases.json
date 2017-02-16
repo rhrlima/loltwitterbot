@@ -1,0 +1,29 @@
+{
+	"keywords": [
+		"#assassin",
+		"#fighter",
+		"#mage",
+		"#marksman",
+		"#support",
+		"#tank"
+	], 
+	"posts": [
+		"You should try {0} {1}!",
+		"Why not trying {0} {1}?",
+		"It is time for some {0} {1}!",
+
+		"I want to see {0} {1}!"
+	],
+	"replies": [
+		"Hey @{0}, you should try {1} {2}!",
+		"Why not trying {1} {2}? @{0}",
+		"Yo @{0}, it is time for some {1} {2}!",
+
+		"@{0}, you may like {1} {2}.",
+		"@{0}, go with {1} {2}!",
+		"Maybe {1} {2}? @{0}."
+	], 
+	"errors": {
+		"keyword_error": "Try use #assassin #fighter #mage #marksman #support #tank"
+	}
+}

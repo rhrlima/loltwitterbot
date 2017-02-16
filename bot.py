@@ -1,13 +1,13 @@
 import datetime
 import json
 import random
+import re
 import sys
 import threading
 import tweepy
 
 #loads the base configurations for access keys
 config = json.loads(open("config.json").read()) #
-
 
 #set up the connection with the twitter api
 auth = tweepy.OAuthHandler(config['consumer_key'], config['consumer_secret'])
@@ -16,17 +16,17 @@ auth.set_access_token(config['access_token_key'], config['access_token_secret'])
 #authorizing the connection
 api = tweepy.API(auth)
 
-
-#loads the champions data from json file
 classes = json.loads(open("classes.json").read()) # load champions
+
+phrases = json.loads(open("phrases.json").read()) # load phrases
 
 
 class BotStreamListener(tweepy.StreamListener):
 
-
 	def on_status(self, status):
-		set_status("reply event triggered", "LOG")
+		set_status("Reply event triggered.", "LOG")
 		parse_request(
+			status.id,
 			status.in_reply_to_screen_name,
 			status.user.screen_name,
 			status.text)
@@ -48,74 +48,66 @@ def get_random_pick(cls=None):
 	return random.choice(classes[cls])
 
 
+#generates a recommendation
+def recommend_pick(to=None, cls=None):
+	champion = get_random_pick(cls)
+	if to is not None:
+		return random.choice(phrases['replies']).format(to, champion['name'], champion['title'])
+	else:
+		return random.choice(phrases['posts']).format(champion['name'], champion['title'])
+
+
 #post a tweet with the given message
 def post_tweet(message):
 	try:
 		status = api.update_status(message)
-		set_status(status.text)
+		set_status("Tweeting: " + status.text, "LOG")
 	except tweepy.TweepError as e:
-		data = json.loads(e.reason.replace("[", "").replace("]", "").replace("'", "\""))
-		set_status(data['message'], "ERROR")
+		set_status(parse_error(e.reason), "ERROR")
 
 
-def reply_tweet(to, message):
-	message = "@" + to + " " + message
-	post_tweet(message)
+def reply_tweet(id, to, message):
+	text = "@{0} {1}"
+	try:
+		status = api.update_status(text.format(to, message), id)
+		set_status("Replying " + status.text, "LOG")
+	except tweepy.TweepError as e:
+		set_status(parse_error(e.reason), "ERROR")
 
 
-def parse_request(to, replyto, text):
+def parse_request(id, to, replyto, text):
 	if to == "what_pick":
 		if "#assassin" in text.lower():
-			recommend_pick(replyto, "ASSASSIN")
+			text = recommend_pick(replyto, "ASSASSIN")
 		elif "#fighter" in text.lower():
-			recommend_pick(replyto, "FIGHTER")
+			text = recommend_pick(replyto, "FIGHTER")
 		elif "#mage" in text.lower():
-			recommend_pick(replyto, "MAGE")
+			text = recommend_pick(replyto, "MAGE")
 		elif "#marksman" in text.lower():
-			recommend_pick(replyto, "MARKSMAN")
+			text = recommend_pick(replyto, "MARKSMAN")
 		elif "#support" in text.lower():
-			recommend_pick(replyto, "SUPPORT")
+			text = recommend_pick(replyto, "SUPPORT")
 		elif "#tank" in text.lower():
-			recommend_pick(replyto, "TANK")
+			text = recommend_pick(replyto, "TANK")
 		else:
-			reply_tweet(replyto, "Try use #assassin #fighter #mage #marksman #support #tank ")
+			text = phrases['errors']["keyword_error"]
+		reply_tweet(id, replyto, text)
 
 
-#---
+def parse_error(error):
+	return json.loads(re.sub("[\[\]]", "", error).replace("'", "\""))['message']
 
 
-def starting_tweet():
-	text = "I am alive! #whatShouldIPick"
-	post_tweet(text)
-
-
-def recommend_pick(to=None, cls=None):
-	champion = get_random_pick(cls)
-	text = ""
-	if to is not None:
-		text += "@" + to + " "
-	text += "You should try " + champion['name'] + " " + champion['title'] + "! #whatShouldIPick"
-	post_tweet(text)
-
-
-#---
-
-
+#print given message to the log with different status
 def set_status(text, status=None):
-	time = datetime.datetime.now()
-	status_text = str(time)
-	if status is None:
-		status_text += "\t<<tweeting>>"
-	elif status is "TRIGGER":
-		status_text += "\t<<triggered>>"
+	if status is "LOG":
+		status = "<< log >>"
 	elif status is "ERROR":
-		status_text += "\t<<error>>"
-	elif status is "LOG":
-		status_text += "\t<< log >>"
+		status = "<<error>>"		
 	else:
-		status_text += "\t<<unkown>>"
-	status_text += "\t" + text
-	print(status_text)
+		status = "<<unkown>>"
+	time = datetime.datetime.now()
+	print("{0}\t{1}\t{2}".format(str(time), status, text))
 
 
 #executes the given function after each X seconds
@@ -128,12 +120,19 @@ def set_interval(func, sec):
     return t
 
 
-set_status("starting lol twitter bot", "LOG")
+def start_bot():
+	try:
+		api.verify_credentials()						#authenticate keys
 
-#starting_tweet() #Initial bot tweet
+		set_status("Starting bot.", "LOG")
 
-#Tweets a random pick each 1h
-set_interval(recommend_pick, 60*60)
+		set_interval(recommend_pick, 60*60)				#Tweets a random pick each 1h
 
-#Stream that reaplies to given keywords
-stream.filter(track=['@what_pick'], async=True)
+		stream.filter(track=['@what_pick'], async=True) #Stream that reaplies to given keywords
+
+	except tweepy.TweepError as e:
+		set_status(parse_error(e.reason), "ERROR")
+
+
+print("wee")
+start_bot()
