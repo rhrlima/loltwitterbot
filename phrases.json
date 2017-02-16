@@ -22,6 +22,6 @@
 		"Maybe {1} {2}? @{0}."
 	], 
 	"errors": {
-		"keyword_error": "Try use #assassin #fighter #mage #marksman #support #tank"
+		"keyword_error": "@{0} Try use #assassin #fighter #mage #marksman #support #tank"
 	}
 }

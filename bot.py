@@ -101,8 +101,9 @@ def parse_request(id, to, replyto, text):
 		elif "#tank" in text.lower():
 			text = recommend_pick(replyto, "TANK")
 		else:
-			text = phrases['errors']["keyword_error"]
-		reply_tweet(id, replyto, text)
+			text = phrases['errors']["keyword_error"].format(replyto)
+		print(text)
+		#reply_tweet(id, replyto, text)
 
 
 def parse_error(error):
@@ -149,4 +150,5 @@ def start_bot():
 		set_status(parse_error(e.reason), "ERROR")
 
 
-start_bot()
+#start_bot()
+parse_request(1, "what_pick", "ricardo_des", "hello")
