@@ -6,17 +6,19 @@ import sys
 import threading
 import tweepy
 
+
 #loads the base configurations for access keys
 config = json.loads(open("config.json").read()) #
+
 
 #set up the connection with the twitter api
 auth = tweepy.OAuthHandler(config['consumer_key'], config['consumer_secret'])
 auth.set_access_token(config['access_token_key'], config['access_token_secret'])
-
-#authorizing the connection
 api = tweepy.API(auth)
 
+
 classes = json.loads(open("classes.json").read()) # load champions
+
 
 phrases = json.loads(open("phrases.json").read()) # load phrases
 
@@ -57,6 +59,14 @@ def recommend_pick(to=None, cls=None):
 		return random.choice(phrases['posts']).format(champion['name'], champion['title'])
 
 
+index = 0
+def get_rotate_pick():
+	global index
+	sequence = ["ASSASSIN", "FIGHTER", "MAGE", "MARKSMAN", "SUPPORT", "TANK"]
+	post_tweet(recommend_pick(cls = sequence[index]))
+	index = (index + 1 if index < len(sequence)-1 else 0)
+
+
 #post a tweet with the given message
 def post_tweet(message):
 	try:
@@ -66,15 +76,16 @@ def post_tweet(message):
 		set_status(parse_error(e.reason), "ERROR")
 
 
+#post a reply to a given tweet
 def reply_tweet(id, to, message):
-	text = "@{0} {1}"
 	try:
-		status = api.update_status(text.format(to, message), id)
-		set_status("Replying " + status.text, "LOG")
+		status = api.update_status(message, id)
+		set_status("Replying: " + status.text, "LOG")
 	except tweepy.TweepError as e:
 		set_status(parse_error(e.reason), "ERROR")
 
 
+#parse keyword
 def parse_request(id, to, replyto, text):
 	if to == "what_pick":
 		if "#assassin" in text.lower():
@@ -122,17 +133,20 @@ def set_interval(func, sec):
 
 def start_bot():
 	try:
-		api.verify_credentials()						#authenticate keys
-
+		api.verify_credentials()							#Authenticate keys
 		set_status("Starting bot.", "LOG")
 
-		set_interval(recommend_pick, 60*60)				#Tweets a random pick each 1h
+		get_rotate_pick()									#Start with first tweet
+		set_status("Initial tweet.", "LOG")
 
-		stream.filter(track=['@what_pick'], async=True) #Stream that reaplies to given keywords
+		set_interval(get_rotate_pick, 60*10)				#Tweets a pick each 10h following a sequence
+		set_status("Recommendation started.", "LOG")
+
+		stream.filter(track=['@what_pick'], async=True) 	#Stream that reaplies to given keywords
+		set_status("Reply sytem started.", "LOG")
 
 	except tweepy.TweepError as e:
 		set_status(parse_error(e.reason), "ERROR")
 
 
-print("wee")
 start_bot()
