@@ -55,18 +55,12 @@ def recommend_pick(to=None, cls=None):
 index = 0
 def get_rotate_pick():
 	global index
-	sequence = ["ASSASSIN", "FIGHTER", "MAGE", "MARKSMAN", "SUPPORT", "TANK"]
-	post_tweet(recommend_pick(cls = sequence[index]))
-	index = (index + 1 if index < len(sequence)-1 else 0)
-
-
-#post a tweet with the given message
-def post_tweet(message):
 	attempts = 0
+	sequence = ["ASSASSIN", "FIGHTER", "MAGE", "MARKSMAN", "SUPPORT", "TANK"]
 	while attempts < 5:
 		try:
-			status = api.update_status(message)
-			set_status("Tweeting: " + status.text, "LOG")
+			post_tweet(recommend_pick(cls = sequence[index]))
+			index = (index + 1 if index < len(sequence)-1 else 0)
 			break
 		except tweepy.TweepError as e:
 			attempts += 1
@@ -76,32 +70,47 @@ def post_tweet(message):
 				set_status(parse_error(e.reason), "ERROR")
 
 
+#post a tweet with the given message
+def post_tweet(message):
+	try:
+		status = api.update_status(message)
+		set_status("Tweeting: " + status.text, "LOG")
+	except tweepy.TweepError as e:
+		raise e
+
+
 #post a reply to a given tweet
 def reply_tweet(id, to, message):
 	try:
 		status = api.update_status(message, id)
 		set_status("Replying: " + status.text, "LOG")
 	except tweepy.TweepError as e:
-		set_status(parse_error(e.reason), "ERROR")
+		raise e
 
 
 #parse keyword
 def parse_request(id, to, replyto, text):
 	if to == "what_pick":
-		if "#assassin" in text.lower():
+		if   phrases['keywords'][0] in text.lower():		#assassin
 			text = recommend_pick(replyto, "ASSASSIN")
-		elif "#fighter" in text.lower():
+		elif phrases['keywords'][1] in text.lower():		#fighter
 			text = recommend_pick(replyto, "FIGHTER")
-		elif "#mage" in text.lower():
+		elif phrases['keywords'][2] in text.lower():		#mage
 			text = recommend_pick(replyto, "MAGE")
-		elif "#marksman" in text.lower():
+		elif phrases['keywords'][3] in text.lower():		#marksman
 			text = recommend_pick(replyto, "MARKSMAN")
-		elif "#support" in text.lower():
+		elif phrases['keywords'][4] in text.lower():		#support
 			text = recommend_pick(replyto, "SUPPORT")
-		elif "#tank" in text.lower():
+		elif phrases['keywords'][5] in text.lower():		#tank
 			text = recommend_pick(replyto, "TANK")
-		else:
+		elif phrases['keywords'][6] in text.lower():		#neverpick
+			text = "@{0} never pick Teemo, because Teemo sucks.".format(replyto)
+		#elif phrases['keywords'][7] in text.lower():		#counterfor
+		#	text = "@{0} sorry bro, I'm not good at it right now."
+		elif phrases['keywords'][8] in text.lower():		#help
 			text = phrases['errors']["keyword_error"].format(replyto)
+		else:
+			text = "@{0} send me #help to know about valid keywords.".format(replyto)
 		reply_tweet(id, replyto, text)
 
 
@@ -120,6 +129,7 @@ def start_stream():
 		set_status("Reply sytem started.", "LOG")
 	except tweepy.TweepError as e:
 		set_status(parse_error(e.reason), "ERROR")
+
 
 #print given message to the log with different status
 def set_status(text, status=None):
@@ -151,7 +161,7 @@ def start_bot():
 		get_rotate_pick()									#Start with first tweet
 		set_status("Initial tweet.", "LOG")
 
-		set_interval(get_rotate_pick, 60*10)				#Tweets a pick each 10h following a sequence
+		set_interval(get_rotate_pick, 60*60)				#Tweets a pick each 1h following a sequence
 		set_status("Recommendation started.", "LOG")
 
 		start_stream()										#Stream that reaplies to given keywords

@@ -5,13 +5,21 @@
 		"#mage",
 		"#marksman",
 		"#support",
-		"#tank"
+		"#tank",
+
+		"#neverpick",
+		"#counterfor",
+		"#help"
 	], 
 	"posts": [
 		"You should try {0} {1}!",
 		"Why not trying {0} {1}?",
 		"It is time for some {0} {1}!",
-		"I want to see some {0} {1}!"
+		"I want to see some {0} {1}!",
+		"Next game try using {0} {1}!",
+		"Don't know what to pick? Go with {0} {1}.",
+		"{0} {1} is always a good pick.",
+		"{0} {1} is as strong as Draven."
 	],
 	"replies": [
 		"Hey @{0}, you should try {1} {2}!",
@@ -19,7 +27,8 @@
 		"Yo @{0}, it is time for some {1} {2}!",
 		"@{0}, you may like {1} {2}.",
 		"@{0}, go with {1} {2}!",
-		"Maybe {1} {2}? @{0}."
+		"Maybe {1} {2}? @{0}.",
+		"Come on {0}, show them what {1} {2} can do!"
 	], 
 	"errors": {
 		"keyword_error": "@{0} Try using: #assassin #fighter #mage #marksman #support #tank"
