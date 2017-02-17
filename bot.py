@@ -10,15 +10,12 @@ import tweepy
 #loads the base configurations for access keys
 config = json.loads(open("config.json").read()) #
 
-
 #set up the connection with the twitter api
 auth = tweepy.OAuthHandler(config['consumer_key'], config['consumer_secret'])
 auth.set_access_token(config['access_token_key'], config['access_token_secret'])
 api = tweepy.API(auth)
 
-
 classes = json.loads(open("classes.json").read()) # load champions
-
 
 phrases = json.loads(open("phrases.json").read()) # load phrases
 
@@ -37,10 +34,6 @@ class BotStreamListener(tweepy.StreamListener):
 	def on_error(self, status_code):
 		if status_code == 420:
 			return False
-
-
-listener = BotStreamListener()
-stream = tweepy.Stream(auth = api.auth, listener = listener)
 
 
 #get a random champion from a random class if not specified
@@ -69,11 +62,18 @@ def get_rotate_pick():
 
 #post a tweet with the given message
 def post_tweet(message):
-	try:
-		status = api.update_status(message)
-		set_status("Tweeting: " + status.text, "LOG")
-	except tweepy.TweepError as e:
-		set_status(parse_error(e.reason), "ERROR")
+	attempts = 0
+	while attempts < 5:
+		try:
+			status = api.update_status(message)
+			set_status("Tweeting: " + status.text, "LOG")
+			break
+		except tweepy.TweepError as e:
+			attempts += 1
+			if attempts < 5:
+				set_status("Erro ocorrido ao postar tweet, tentando novamente.", "ERROR")
+			else:
+				set_status(parse_error(e.reason), "ERROR")
 
 
 #post a reply to a given tweet
@@ -106,8 +106,20 @@ def parse_request(id, to, replyto, text):
 
 
 def parse_error(error):
-	return json.loads(re.sub("[\[\]]", "", error).replace("'", "\""))['message']
+	data = json.loads(re.sub("[\[\]]", "", error).replace("'", "\""))
+	error_code = str(data['code'])
+	error_message = data['message']
+	return error_code + " " + error_message
 
+
+def start_stream():
+	listener = BotStreamListener()
+	stream = tweepy.Stream(auth = api.auth, listener = listener)
+	try:
+		stream.filter(track=['@what_pick'], async=True)
+		set_status("Reply sytem started.", "LOG")
+	except tweepy.TweepError as e:
+		set_status(parse_error(e.reason), "ERROR")
 
 #print given message to the log with different status
 def set_status(text, status=None):
@@ -142,8 +154,7 @@ def start_bot():
 		set_interval(get_rotate_pick, 60*10)				#Tweets a pick each 10h following a sequence
 		set_status("Recommendation started.", "LOG")
 
-		stream.filter(track=['@what_pick'], async=True) 	#Stream that reaplies to given keywords
-		set_status("Reply sytem started.", "LOG")
+		start_stream()										#Stream that reaplies to given keywords
 
 	except tweepy.TweepError as e:
 		set_status(parse_error(e.reason), "ERROR")
