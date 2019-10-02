@@ -43,7 +43,7 @@ def _save_data(file_name, data):
 
 def _parse_data(data):
     parsed_data = {}
-    tags_to_copy = ['id', 'key', 'name', 'title', 'tags']
+    tags_to_copy = ['id', 'key', 'name', 'title', 'info', 'tags']
 
     parsed_data['version'] = data['version']
     parsed_data['data'] = {}

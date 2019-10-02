@@ -7,4 +7,6 @@ if __name__ == '__main__':
 	data.get_updated_data(force=False)
 
 	bot = bot.Bot()
-	bot.get_pick()
+	
+	for _ in range(5):
+		print(bot.get_pick())
