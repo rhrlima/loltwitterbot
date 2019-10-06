@@ -1,9 +1,6 @@
 '''
 Downloads and updates the champions.json file when needed
 
-TODO:
-list of changes
-
 https://ddragon.leagueoflegends.com/api/versions.json
 http://ddragon.leagueoflegends.com/cdn/<version>/data/en_US/champion.json
 '''

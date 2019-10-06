@@ -2,7 +2,7 @@ import json
 import random
 
 
-class Bot:
+class PostBuilder:
 
     def __init__(self, 
         champions_file='data/champions.json', 
@@ -12,9 +12,9 @@ class Bot:
     def _initialize(self, champions_file, phrases_file):
         self.champions_data = self._read_champions_data(champions_file)
         self.phrases = self._read_phases_data(phrases_file)
-        self.message = '{}\n\nAttack: {}\nDefense: {}\nMagic: {}\nDifficulty: {}\n\n#WhatShouldIPick {}'
         self.tags = list(self.champions_data['tags'].keys())
         self.rotation = -1
+        self.message = '{}\n\nAttack: {}\nDefense: {}\nMagic: {}\nDifficulty: {}\n\n#League_of_Legends {}'
 
     def _read_champions_data(self, file_name):
         with open(file_name, 'r') as f:
@@ -49,10 +49,10 @@ class Bot:
         phrase = phrase.format(champ['name'], champ['title'])
         text = self.message.format(
             phrase,
-            '*'*champ['info']['attack'],
-            '*'*champ['info']['defense'],
-            '*'*champ['info']['magic'],
-            '*'*champ['info']['difficulty'],
+            '⚔'*champ['info']['attack'],
+            '🛡'*champ['info']['defense'],
+            '🔥'*champ['info']['magic'],
+            '⭐'*champ['info']['difficulty'],
             ' '.join(['#'+t for t in champ['tags']])
         )
         return text
@@ -60,5 +60,5 @@ class Bot:
 
 if __name__ == '__main__':
     
-    bot = Bot()
+    bot = PostBuilder()
     print(bot.get_formated_message())
