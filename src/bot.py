@@ -56,9 +56,3 @@ class PostBuilder:
             ' '.join(['#'+t for t in champ['tags']])
         )
         return text
-
-
-if __name__ == '__main__':
-    
-    bot = PostBuilder()
-    print(bot.get_formated_message())

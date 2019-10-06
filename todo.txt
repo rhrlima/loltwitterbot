@@ -1,9 +1,0 @@
-#TODO
-[ ] add more phrases
-[ ] add more keywords
-[ ] parse multiple keywords
-[ ] add funny stuff
-[ ] improve readme file
-[.] organize code
-[ ] add change log to update data
-[ ] find GOOD NAME

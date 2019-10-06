@@ -93,9 +93,3 @@ def get_updated_data(file_name='data/champions.json', force=False):
         _save_data(file_name, data)
 
     print('data version is ', data['version'])
-
-
-if __name__ == '__main__':
-    
-    force = sys.argv[1] if len(sys.argv) > 1 else False
-    get_updated_data(force=force)
