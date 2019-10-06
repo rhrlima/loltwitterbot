@@ -48,4 +48,4 @@ class TwitterBot:
     def start(self):
         print('service started')
         self._post_tweet()
-        self._execute_with_interval(self._post_tweet(), 3600)
+        self._execute_with_interval(self._post_tweet, 3600)
