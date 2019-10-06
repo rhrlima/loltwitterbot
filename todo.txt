@@ -4,6 +4,6 @@
 [ ] parse multiple keywords
 [ ] add funny stuff
 [ ] improve readme file
-[ ] organize code
+[.] organize code
 [ ] add change log to update data
-
+[ ] find GOOD NAME

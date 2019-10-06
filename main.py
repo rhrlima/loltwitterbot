@@ -8,5 +8,5 @@ if __name__ == '__main__':
 
 	bot = bot.Bot()
 	
-	for _ in range(5):
-		print(bot.get_pick())
+	for _ in range(8):
+		print(bot.get_formated_message())
