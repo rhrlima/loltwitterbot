@@ -14,7 +14,7 @@ class PostBuilder:
         self.phrases = self._read_phases_data(phrases_file)
         self.tags = list(self.champions_data['tags'].keys())
         self.rotation = -1
-        self.message = '{}\n\nAttack: {}\nDefense: {}\nMagic: {}\nDifficulty: {}\n\n#League_of_Legends {}'
+        self.message = self.phrases['message']
 
     def _read_champions_data(self, file_name):
         with open(file_name, 'r') as f:
@@ -56,3 +56,9 @@ class PostBuilder:
             ' '.join(['#'+t for t in champ['tags']])
         )
         return text
+
+
+if __name__ == '__main__':
+    
+    post = PostBuilder('../data/champions.json', '../data/phrases.json')
+    print(post.get_formated_message())

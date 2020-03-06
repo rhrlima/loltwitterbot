@@ -19,8 +19,13 @@
 		"Next game try using {0} {1}!",
 		"Don't know what to pick? Go with {0} {1}.",
 		"{0} {1} is always a good pick.",
-		"{0} {1} is almost as strong as Draven."
-	],
+		"{0} {1} is almost as strong as Draven.",
+		"Let me see some {0} {1}!",
+		"{0} {1} is a great pick!",
+		"Do not like Teemo? Try {0} {1}.",
+		"You should try {0} {1} for no reason.",
+		"{0} {1} is good? I don't know!"
+	], 
 	"replies": [
 		"Hey @{0}, you should try {1} {2}!",
 		"Why not trying {1} {2}? @{0}",
@@ -32,5 +37,6 @@
 	], 
 	"errors": {
 		"keyword_error": "@{0} Try using: #assassin #fighter #mage #marksman #support #tank"
-	}
+	}, 
+	"message": "{}\n\nAttack: {}\nDefense: {}\nMagic: {}\nDifficulty: {}\n\n#LeagueOfLegends {}"
 }

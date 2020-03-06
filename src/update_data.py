@@ -64,6 +64,17 @@ def _parse_data(data):
     return parsed_data
 
 
+def _compare_versions(ver1, ver2):
+
+    ver1 = [int(v) for v in ver1.split('.')]# int(ver1.replace('.', ''))
+    ver2 = [int(v) for v in ver2.split('.')]
+
+    for v1, v2 in zip(ver1, ver2):
+        if v1 < v2:
+            return True
+    return False
+
+
 def get_updated_data(file_name='data/champions.json', force=False):
     base_url = 'https://ddragon.leagueoflegends.com'
 
@@ -71,12 +82,12 @@ def get_updated_data(file_name='data/champions.json', force=False):
     data = _read_from_file(file_name)
     s_ver = _get_version_from_server(base_url)
     
-    if data is None or data['version'] < s_ver or force:
+    if (data is None or _compare_versions(data['version'], s_ver)) or force:
 
         if data is None:
             print('no local data found')
 
-        if data['version'] < s_ver:
+        elif _compare_versions(data['version'], s_ver):
             l_ver = data['version']
             print(f'local version {l_ver} older than server version {s_ver}')
 
@@ -92,4 +103,9 @@ def get_updated_data(file_name='data/champions.json', force=False):
         print('saving')
         _save_data(file_name, data)
 
-    print('data version is ', data['version'])
+    print('data version is', data['version'])
+
+
+if __name__ == '__main__':
+    
+    get_updated_data(file_name='../data/champions.json')
