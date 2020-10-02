@@ -108,4 +108,4 @@ def get_updated_data(file_name='data/champions.json', force=False):
 
 if __name__ == '__main__':
     
-    get_updated_data(file_name='../data/champions.json')
+    get_updated_data(file_name='data/champions.json')
