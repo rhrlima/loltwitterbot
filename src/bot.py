@@ -60,5 +60,5 @@ class PostBuilder:
 
 if __name__ == '__main__':
     
-    post = PostBuilder('../data/champions.json', '../data/phrases.json')
+    post = PostBuilder('data/champions.json', 'data/phrases.json')
     print(post.get_formated_message())
