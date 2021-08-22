@@ -24,7 +24,7 @@
 		"{0} {1} is a great pick!",
 		"Do not like Teemo? Try {0} {1}.",
 		"You should try {0} {1} for no reason.",
-		"{0} {1} is good? I don't know!"
+		"Is {0} {1} good? I don't know!"
 	], 
 	"replies": [
 		"Hey @{0}, you should try {1} {2}!",
