@@ -49,8 +49,8 @@ class PostBuilder:
         phrase = phrase.format(champ['name'], champ['title'])
         text = self.message.format(
             phrase,
-            '⚔'*champ['info']['attack'],
-            '🛡'*champ['info']['defense'],
+            '⚔️'*champ['info']['attack'],
+            '🛡️'*champ['info']['defense'],
             '🔥'*champ['info']['magic'],
             '⭐'*champ['info']['difficulty'],
             ' '.join(['#'+t for t in champ['tags']])

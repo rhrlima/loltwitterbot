@@ -6,10 +6,7 @@ http://ddragon.leagueoflegends.com/cdn/<version>/data/en_US/champion.json
 '''
 
 import os
-import sys
 import json
-
-import numpy as np
 
 from urllib import request
 
