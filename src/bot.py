@@ -1,64 +1,66 @@
-import json
-import random
+import os
+import threading
+import tweepy
+
+import src.update_data as data
+from src.post_builder import PostBuilder
 
 
-class PostBuilder:
+class TwitterBot:
 
-    def __init__(self, 
-        champions_file='data/champions.json', 
-        phrases_file='data/phrases.json'):
-        self._initialize(champions_file, phrases_file)
+    def __init__(self):
+        self._connect()
+        self._initialize()
 
-    def _initialize(self, champions_file, phrases_file):
-        self.champions_data = self._read_champions_data(champions_file)
-        self.phrases = self._read_phases_data(phrases_file)
-        self.tags = list(self.champions_data['tags'].keys())
-        self.rotation = -1
-        self.message = self.phrases['message']
+    def _connect(self):
+        api_key = os.environ['lolbot_api']
+        api_key_secret = os.environ['lolbot_api_secret']
+        access_key = os.environ['lolbot_access']
+        access_key_secret = os.environ['lolbot_access_secret']
 
-    def _read_champions_data(self, file_name):
-        with open(file_name, 'r') as f:
-            return json.loads(f.read())
+        auth = tweepy.OAuthHandler(api_key, api_key_secret)
+        auth.set_access_token(access_key, access_key_secret)
+        self.api = tweepy.API(auth)
 
-    def _read_phases_data(self, file_name):
-        with open(file_name, 'r') as f:
-            return json.loads(f.read())
+    def _initialize(self):
+        data.get_updated_data()
+        self.post_builder = PostBuilder()
 
-    def _get_next_tag(self):
-        self.rotation += 1
-        if self.rotation >= len(self.tags):
-            self.rotation = 0
-        return self.tags[self.rotation]
+    def post_data_update(self):
+        self._initialize()
+        curr_version = self.post_builder.champions_data['version']
+        message = f'Champion data updated to version {curr_version}'
+        self.post_tweet(message)
 
-    def _get_random_champion(self, data, tag):
-        if tag is None:
-            pool = list(data['data'].keys())
-        else:
-            pool = data['tags'][tag]
-        return data['data'][random.choice(pool)]
+    def post_tweet(self, message=None):
+        try:
+            if message is None:
+                message = self.post_builder.get_formated_message()
+            # post and log
+            print(self.api.update_status(message))
+        except tweepy.TweepError as e:
+            raise e
 
-    def _get_random_phrase(self, data):
-        return random.choice(data['posts'])
+    def reply_tweet(self, id, reply_to, message):
+        pass
 
-    def get_formated_message(self, tag=None):
+    def _parse_request(self):
+        pass
 
-        tag = self._get_next_tag() if tag is None else tag
-        champ = self._get_random_champion(self.champions_data, tag)
-        phrase = self._get_random_phrase(self.phrases)
+    def _execute_with_interval(self, func, seconds=60):
+        def func_wrapper():
+            self._execute_with_interval(func, seconds)
+            func()
+        threading.Timer(seconds, func_wrapper).start()
 
-        phrase = phrase.format(champ['name'], champ['title'])
-        text = self.message.format(
-            phrase,
-            '⚔️'*champ['info']['attack'],
-            '🛡️'*champ['info']['defense'],
-            '🔥'*champ['info']['magic'],
-            '⭐'*champ['info']['difficulty'],
-            ' '.join(['#'+t for t in champ['tags']])
-        )
-        return text
+    def start(self):
+        print('service started')
 
+        # first post
+        self.post_tweet()
 
-if __name__ == '__main__':
-    
-    post = PostBuilder('data/champions.json', 'data/phrases.json')
-    print(post.get_formated_message())
+        # creates an infinite queue with posts every 1h
+        self._execute_with_interval(self.post_tweet, 60 * 60)
+
+        # creates an infinite queue for updating the data and posting every 1w
+        self._execute_with_interval(self.post_data_update(), 60 * 60 * 24 * 7)
