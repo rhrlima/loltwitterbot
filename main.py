@@ -1,4 +1,4 @@
-from src.twitter import TwitterBot
+from src.bot import TwitterBot
 
 if __name__ == '__main__':
 	
