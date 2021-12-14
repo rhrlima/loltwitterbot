@@ -3,7 +3,7 @@ import json
 
 from urllib import request
 
-from sources import LOCAL_CHAMPION_DATA, VERSION_URL, CHAMPION_URL
+from .sources import LOCAL_CHAMPION_DATA, VERSION_URL, CHAMPION_URL
 
 
 def _read_data_from_url(url: str):
@@ -75,7 +75,7 @@ def _compare_versions(ver1: str, ver2: str):
 
 def get_updated_data(file_name: str=LOCAL_CHAMPION_DATA, force: bool=False):
 
-    print('reading local data')
+    print(f'Reading local data from: \'{file_name}\'')
     data = _read_data_from_local(file_name)
 
     # server version
@@ -84,30 +84,31 @@ def get_updated_data(file_name: str=LOCAL_CHAMPION_DATA, force: bool=False):
     if data is None or force or _compare_versions(data['version'], s_ver):
 
         if data is None:
-            print('no local data found')
+            print('No local data found')
 
         elif force:
-            print('force update requested')
+            print('Force update requested')
 
         else:
             l_ver = data['version']
-            print(f'local version {l_ver} older than server version {s_ver}')
+            print(f'Local version \'{l_ver}\' older than server version \'{s_ver}\'')
 
-        print('loading from server')
+        print(f'Loading from server at: \'{CHAMPION_URL.format(s_ver)}\'')
         data = _read_data_from_server(CHAMPION_URL.format(s_ver))
 
-        print('parsing data')
+        print('Parsing data')
         data = _parse_data(data)
 
-        print('saving')
+        print(f'Saving data to: \'{file_name}\'')
         _save_data(file_name, data)
 
-        print('data version updated to', data['version'])
+        print(f'Data version updated to \'{data["version"]}\'')
 
     else:
-        print('local data is up to date', data['version'])
+        print(f'Local data is up to date \'{data["version"]}\'')
 
 
 if __name__ == '__main__':
 
+    print('Manually triggered')
     get_updated_data()

@@ -1,7 +1,7 @@
 import json
 import random
 
-from sources import LOCAL_CHAMPION_DATA, LOCAL_PHRASES_DATA
+from .sources import LOCAL_CHAMPION_DATA, LOCAL_PHRASES_DATA
 
 
 def _read_data(file_name):
@@ -54,6 +54,6 @@ class PostBuilder:
 
 if __name__ == '__main__':
     
-    # local run
+    print('Manually trigerred')
     post = PostBuilder()
     print(post.get_formated_message())
