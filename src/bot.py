@@ -54,13 +54,20 @@ class TwitterBot:
         threading.Timer(seconds, func_wrapper).start()
 
     def start(self):
-        print('service started')
+        print('Bot Started')
 
         # first post
+        self.post_data_update()
         self.post_tweet()
 
         # creates an infinite queue with posts every 1h
         self._execute_with_interval(self.post_tweet, 60 * 60)
 
-        # creates an infinite queue for updating the data and posting every 1w
-        self._execute_with_interval(self.post_data_update(), 60 * 60 * 24 * 7)
+        # creates an infinite queue for updating the data and posting every week
+        self._execute_with_interval(
+            self.post_data_update, 
+            60      # 1 minute
+            * 60    # 1 hour
+            * 24    # 1 day
+            * 7     # 1 week
+        )
