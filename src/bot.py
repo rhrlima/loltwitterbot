@@ -65,7 +65,7 @@ class TwitterBot:
 
         # creates an infinite queue for updating the data and posting every week
         self._execute_with_interval(
-            self.post_data_update(), 
+            self.post_data_update, 
             60      # 1 minute
             * 60    # 1 hour
             * 24    # 1 day
